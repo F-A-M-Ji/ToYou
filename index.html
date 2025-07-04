@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* --- การตั้งค่าพื้นฐาน --- */
         body {
             font-family: 'Kanit', sans-serif;
             display: flex;
@@ -21,6 +22,7 @@
             perspective: 1000px;
         }
 
+        /* --- คอนเทนเนอร์หลักสำหรับหัวใจ --- */
         .container {
             position: relative;
             width: 300px;
@@ -28,8 +30,21 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer; /* เปลี่ยนเมาส์เป็นรูปมือเมื่อชี้ */
+            transition: transform 0.5s ease;
+        }
+        
+        /* --- เพิ่ม Animation หัวใจเต้น --- */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        
+        .pulsating {
+            animation: heartbeat 2.5s infinite ease-in-out;
         }
 
+        /* --- อนุภาคที่ประกอบเป็นหัวใจ --- */
         .particle {
             position: absolute;
             width: 8px;
@@ -37,72 +52,155 @@
             background-color: #ff4757;
             border-radius: 50%;
             opacity: 0;
+            /* ทำให้การเคลื่อนไหวดูนุ่มนวลและเด้งเล็กน้อย */
             transition: all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        #message {
+        /* --- ข้อความ --- */
+        .message-text {
             opacity: 0;
             transform: scale(0.5);
-            transition: opacity 1.5s ease-in-out 2.5s, transform 1.5s ease-in-out 2.5s;
             color: white;
             font-size: 3.5rem; /* 56px */
             font-weight: bold;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
             z-index: 10;
             position: absolute;
+            text-align: center;
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+        }
+
+        /* --- ประกายดาวพื้นหลัง --- */
+        .sparkle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
+    <!-- คอนเทนเนอร์สำหรับประกายดาว -->
+    <div id="sparkle-container" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+
+    <!-- คอนเทนเนอร์หลัก -->
     <div id="container" class="container">
-        <h1 id="message">รักนะคะ</h1>
+        <!-- ข้อความแรก -->
+        <h1 id="message1" class="message-text">รักพี่นะคะ</h1>
+        <!-- ข้อความที่สอง (ซ่อนไว้) -->
+        <h2 id="message2" class="message-text" style="font-size: 1.75rem;">จาก...แฟนของพี่</h2>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('container');
-            const message = document.getElementById('message');
+            const message1 = document.getElementById('message1');
+            const message2 = document.getElementById('message2');
+            const sparkleContainer = document.getElementById('sparkle-container');
+            
             const particleCount = 250;
-            const radius = 12; // Controls the size of the heart
+            const radius = 12; // ขนาดของหัวใจ
+            
+            // --- ตัวแปรสำหรับจัดการสถานะ ---
+            let isMessageFlipped = false; // true = แสดงข้อความที่ 2, false = แสดงข้อความที่ 1
+            let isReadyForClick = false;  // ป้องกันการคลิกก่อน animation แรกจะเสร็จ
 
-            // Create particles
+            // --- 1. สร้างประกายดาวพื้นหลัง ---
+            const sparkleCount = 30;
+            for (let i = 0; i < sparkleCount; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.animationDuration = `${5 + Math.random() * 10}s`;
+                sparkle.style.animationDelay = `${Math.random() * 10}s`;
+                const size = 1 + Math.random() * 3;
+                sparkle.style.width = `${size}px`;
+                sparkle.style.height = `${size}px`;
+                sparkleContainer.appendChild(sparkle);
+            }
+
+            // --- 2. สร้างอนุภาคสำหรับหัวใจ ---
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
-                
-                // Set initial random position
                 const angle = Math.random() * 2 * Math.PI;
                 const r = 250 + Math.random() * 250;
                 particle.style.transform = `translate(${Math.cos(angle) * r}px, ${Math.sin(angle) * r}px) scale(0)`;
-                
                 container.appendChild(particle);
             }
 
             const particles = document.querySelectorAll('.particle');
 
-            // Animate particles to form a heart
+            // --- 3. เริ่ม Animation หลัก ---
             setTimeout(() => {
                 particles.forEach((particle, i) => {
                     const t = (i / (particleCount - 1)) * 2 * Math.PI;
-
-                    // Parametric equation for a heart shape
                     const x = radius * 16 * Math.pow(Math.sin(t), 3);
                     const y = -radius * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-
                     particle.style.opacity = '1';
                     particle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
                 });
 
-                // Show the message after the heart is formed
-                message.style.opacity = '1';
-                message.style.transform = 'scale(1)';
+                setTimeout(() => {
+                    message1.style.opacity = '1';
+                    message1.style.transform = 'scale(1)';
+                    container.classList.add('pulsating');
+                    isReadyForClick = true; // เปิดให้คลิกได้หลังจาก animation แรกจบ
+                }, 2500);
 
-            }, 100); // Start animation shortly after page load
+            }, 100);
+
+            // --- 4. จัดการการคลิกเพื่อสลับข้อความ (อัปเดตให้วนลูปได้) ---
+            container.addEventListener('click', () => {
+                if (!isReadyForClick) return; // ถ้ายังไม่พร้อม ให้เมินการคลิก
+
+                container.classList.remove('pulsating'); // หยุดการเต้นชั่วคราว
+
+                if (!isMessageFlipped) {
+                    // ถ้ากำลังแสดงข้อความที่ 1 > ให้สลับไปแสดงข้อความที่ 2
+                    message1.style.opacity = '0';
+                    message1.style.transform = 'scale(0.5)';
+
+                    setTimeout(() => {
+                        message2.style.opacity = '1';
+                        message2.style.transform = 'scale(1)';
+                        container.classList.add('pulsating'); // กลับมาเต้นใหม่
+                        isMessageFlipped = true; // อัปเดตสถานะ
+                    }, 1500);
+                } else {
+                    // ถ้ากำลังแสดงข้อความที่ 2 > ให้สลับกลับไปแสดงข้อความที่ 1
+                    message2.style.opacity = '0';
+                    message2.style.transform = 'scale(0.5)';
+
+                    setTimeout(() => {
+                        message1.style.opacity = '1';
+                        message1.style.transform = 'scale(1)';
+                        container.classList.add('pulsating'); // กลับมาเต้นใหม่
+                        isMessageFlipped = false; // อัปเดตสถานะ
+                    }, 1500);
+                }
+            });
         });
     </script>
 
 </body>
 </html>
-
 
