@@ -3,204 +3,385 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สำหรับคนพิเศษ ❤️</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>A Special Game for You</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&family=VT323&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
-        /* --- การตั้งค่าพื้นฐาน --- */
+        :root {
+            --bg-color: #0a0a0a;
+            --wall-color: #333;
+            --path-color: #0a0a0a;
+            --player-color: #ff4141;
+            --goal-color: #41ffca;
+            --text-color: #e0e0e0;
+            --romantic-pink: #ff8a80;
+            --romantic-gold: #ffd700;
+        }
+
         body {
-            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Sarabun', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
             overflow: hidden;
-            perspective: 1000px;
+            text-align: center;
         }
 
-        /* --- คอนเทนเนอร์หลักสำหรับหัวใจ --- */
-        .container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            display: flex;
+        #game-container {
+            border: 2px solid var(--wall-color);
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #111;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            transition: opacity 0.5s ease-out;
+        }
+
+        h1 {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            color: var(--player-color);
+            margin-bottom: 5px;
+            animation: fadeIn 2s;
+        }
+
+        p {
+            margin-top: 0;
+            font-size: 1rem;
+            animation: fadeIn 2s;
+        }
+
+        canvas {
+            background-color: var(--path-color);
+            display: block;
+            border-radius: 4px;
+        }
+
+        /* --- Romantic Overlay Styles --- */
+        #message-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            display: none;
             justify-content: center;
             align-items: center;
-            cursor: pointer; /* เปลี่ยนเมาส์เป็นรูปมือเมื่อชี้ */
-            transition: transform 0.5s ease;
+            flex-direction: column;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 2s ease-in;
+            overflow: hidden;
         }
         
-        /* --- เพิ่ม Animation หัวใจเต้น --- */
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-        }
-        
-        .pulsating {
-            animation: heartbeat 2.5s infinite ease-in-out;
-        }
-
-        /* --- อนุภาคที่ประกอบเป็นหัวใจ --- */
-        .particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: #ff4757;
-            border-radius: 50%;
+        #message-content {
+            transform: translateY(20px);
             opacity: 0;
-            /* ทำให้การเคลื่อนไหวดูนุ่มนวลและเด้งเล็กน้อย */
-            transition: all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* --- ข้อความ --- */
-        .message-text {
-            opacity: 0;
-            transform: scale(0.5);
-            color: white;
-            font-size: 3.5rem; /* 56px */
-            font-weight: bold;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-            position: absolute;
+            animation: fadeInUp 2s ease-out 1s forwards;
             text-align: center;
-            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+        }
+        
+        #birthday-message {
+            font-family: 'Great Vibes', cursive;
+            font-size: 5rem;
+            font-weight: normal;
+            color: var(--romantic-gold);
+            text-shadow: 0 0 15px var(--romantic-gold), 0 0 25px var(--romantic-gold);
+            margin: 0;
+        }
+        
+        #love-message {
+            font-size: 1.8rem;
+            color: #eee;
+            margin-top: 20px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        
+        #final-message {
+            font-size: 1.5rem;
+            color: #ddd;
+            margin-top: 10px;
+        }
+        
+        .heart-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            animation: beat 1.5s infinite ease-in-out;
         }
 
-        /* --- ประกายดาวพื้นหลัง --- */
-        .sparkle {
+        /* --- Animations --- */
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Starfield Background --- */
+        .stars {
+            background: #000 url(https://www.transparenttextures.com/patterns/stardust.png);
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background-color: white;
-            border-radius: 50%;
-            opacity: 0;
-            animation: float 10s infinite linear;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: -1;
+        }
+        .stars.stars1 { animation: move-twink-back 200s linear infinite; }
+        .stars.stars2 { animation: move-twink-back 150s linear infinite; }
+        .stars.stars3 { animation: move-twink-back 100s linear infinite; }
+
+        @keyframes move-twink-back {
+            from { background-position: 0 0; }
+            to { background-position: -10000px 5000px; }
         }
 
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            50% {
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(-100vh) scale(1);
-                opacity: 0;
-            }
+
+        /* Glitch Effect */
+        .glitch {
+            animation: glitch-animation 0.5s infinite;
+        }
+
+        @keyframes glitch-animation {
+            0% { transform: translate(0); }
+            20% { transform: translate(-5px, 5px); }
+            40% { transform: translate(-5px, -5px); }
+            60% { transform: translate(5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            100% { transform: translate(0); }
+        }
+        
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient( to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) );
+            background-size: 100% 4px;
+            animation: scanline-animation 4s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes scanline-animation {
+            from { background-position: 0 0; }
+            to { background-position: 0 -100px; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Mobile controls */
+        #mobile-controls {
+            display: none;
+            margin-top: 20px;
+            user-select: none;
+        }
+        #mobile-controls button {
+            background-color: #333; color: white; border: 1px solid #555; border-radius: 50%;
+            width: 60px; height: 60px; margin: 5px; font-size: 24px; font-weight: bold;
+        }
+        #mobile-controls div { display: flex; justify-content: center; align-items: center; }
+
+        @media (max-width: 768px) {
+            #mobile-controls { display: block; }
+            h1 { font-size: 1.5rem; }
+            p { font-size: 0.9rem; }
+            #birthday-message { font-size: 3rem; }
+            #love-message { font-size: 1.2rem; }
+            #final-message { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
+    <div class="scanline"></div>
+    <div id="game-container">
+        <h1 id="level-title">Level 1</h1>
+        <p id="subtitle">Find the way out.</p>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    
+    <div id="mobile-controls">
+        <div><button id="btn-up">▲</button></div>
+        <div><button id="btn-left">◄</button><button id="btn-down">▼</button><button id="btn-right">►</button></div>
+    </div>
 
-    <!-- คอนเทนเนอร์สำหรับประกายดาว -->
-    <div id="sparkle-container" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
-
-    <!-- คอนเทนเนอร์หลัก -->
-    <div id="container" class="container">
-        <!-- ข้อความแรก -->
-        <h1 id="message1" class="message-text">รักพี่นะคะ</h1>
-        <!-- ข้อความที่สอง (ซ่อนไว้) -->
-        <h2 id="message2" class="message-text" style="font-size: 1.75rem;">จาก...แฟนของพี่</h2>
+    <div id="message-overlay">
+        <div class="stars stars1"></div>
+        <div class="stars stars2"></div>
+        <div class="stars stars3"></div>
+        <div id="message-content">
+            <svg class="heart-icon" viewBox="0 0 24 24">
+                <path fill="#ff4757" d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
+            </svg>
+            <h2 id="birthday-message">Love You</h2>
+            <!-- <p id="love-message">แด่คนพิเศษที่สุดในโลกของฉัน</p> -->
+            <p id="final-message">❤️ รักพี่นะคะ ❤️</p>
+        </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('container');
-            const message1 = document.getElementById('message1');
-            const message2 = document.getElementById('message2');
-            const sparkleContainer = document.getElementById('sparkle-container');
-            
-            const particleCount = 250;
-            const radius = 12; // ขนาดของหัวใจ
-            
-            // --- ตัวแปรสำหรับจัดการสถานะ ---
-            let isMessageFlipped = false; // true = แสดงข้อความที่ 2, false = แสดงข้อความที่ 1
-            let isReadyForClick = false;  // ป้องกันการคลิกก่อน animation แรกจะเสร็จ
+        // --- Game Setup ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const titleElement = document.getElementById('level-title');
+        const subtitleElement = document.getElementById('subtitle');
+        const messageOverlay = document.getElementById('message-overlay');
 
-            // --- 1. สร้างประกายดาวพื้นหลัง ---
-            const sparkleCount = 30;
-            for (let i = 0; i < sparkleCount; i++) {
-                const sparkle = document.createElement('div');
-                sparkle.classList.add('sparkle');
-                sparkle.style.left = `${Math.random() * 100}%`;
-                sparkle.style.animationDuration = `${5 + Math.random() * 10}s`;
-                sparkle.style.animationDelay = `${Math.random() * 10}s`;
-                const size = 1 + Math.random() * 3;
-                sparkle.style.width = `${size}px`;
-                sparkle.style.height = `${size}px`;
-                sparkleContainer.appendChild(sparkle);
-            }
+        const TILE_SIZE = 20;
+        let currentLevel = 0;
+        let player, goal;
+        let gameEnded = false;
 
-            // --- 2. สร้างอนุภาคสำหรับหัวใจ ---
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                const angle = Math.random() * 2 * Math.PI;
-                const r = 250 + Math.random() * 250;
-                particle.style.transform = `translate(${Math.cos(angle) * r}px, ${Math.sin(angle) * r}px) scale(0)`;
-                container.appendChild(particle);
-            }
+        // --- Maze Data (Unchanged) ---
+        const levels = [
+            // Level 1
+            [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,2,0,0,1,0,0,0,1,0,0,0,0,0,1],[1,1,1,0,1,0,1,0,1,0,1,1,1,0,1],[1,0,0,0,0,0,1,0,0,0,0,0,1,0,1],[1,0,1,1,1,1,1,1,1,1,1,0,1,0,1],[1,0,0,0,0,0,0,0,0,0,1,0,1,0,1],[1,1,1,1,1,0,1,1,1,0,1,0,1,0,1],[1,0,0,0,1,0,1,0,0,0,1,0,0,0,1],[1,0,1,0,1,0,1,0,1,1,1,1,1,0,1],[1,0,1,0,0,0,1,0,0,0,0,0,0,3,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+            // Level 2
+            [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,2,1,0,0,0,1,0,0,0,1,0,0,0,1],[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],[1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],[1,1,1,1,1,1,1,0,1,1,1,1,1,0,1],[1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],[1,0,1,1,1,0,1,1,1,1,1,0,1,1,1],[1,0,1,0,0,0,0,0,0,0,1,0,0,3,1],[1,0,1,0,1,1,1,1,1,0,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+            // Level 3 (FIXED)
+            [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,3,0,0,0,1,0,0,0,1,0,0,0,0,1],[1,1,0,1,0,1,0,1,0,1,0,1,1,0,1],[1,0,0,1,0,1,0,1,0,1,0,1,0,0,1],[1,0,1,1,0,1,0,1,0,1,0,1,1,0,1],[1,0,0,0,0,0,0,1,0,1,0,0,0,0,1],[1,1,1,1,1,1,0,1,0,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,1,1,1,1,1,1,1,1,1,1,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,1,2,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+            // Level 4
+            [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,2,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,3,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+        ];
+        const levelSubtitles = ["Find the way out.","It's getting darker.","Don't look back.","Something is wrong..."];
 
-            const particles = document.querySelectorAll('.particle');
-
-            // --- 3. เริ่ม Animation หลัก ---
-            setTimeout(() => {
-                particles.forEach((particle, i) => {
-                    const t = (i / (particleCount - 1)) * 2 * Math.PI;
-                    const x = radius * 16 * Math.pow(Math.sin(t), 3);
-                    const y = -radius * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-                    particle.style.opacity = '1';
-                    particle.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-                });
-
-                setTimeout(() => {
-                    message1.style.opacity = '1';
-                    message1.style.transform = 'scale(1)';
-                    container.classList.add('pulsating');
-                    isReadyForClick = true; // เปิดให้คลิกได้หลังจาก animation แรกจบ
-                }, 2500);
-
-            }, 100);
-
-            // --- 4. จัดการการคลิกเพื่อสลับข้อความ (อัปเดตให้วนลูปได้) ---
-            container.addEventListener('click', () => {
-                if (!isReadyForClick) return; // ถ้ายังไม่พร้อม ให้เมินการคลิก
-
-                container.classList.remove('pulsating'); // หยุดการเต้นชั่วคราว
-
-                if (!isMessageFlipped) {
-                    // ถ้ากำลังแสดงข้อความที่ 1 > ให้สลับไปแสดงข้อความที่ 2
-                    message1.style.opacity = '0';
-                    message1.style.transform = 'scale(0.5)';
-
-                    setTimeout(() => {
-                        message2.style.opacity = '1';
-                        message2.style.transform = 'scale(1)';
-                        container.classList.add('pulsating'); // กลับมาเต้นใหม่
-                        isMessageFlipped = true; // อัปเดตสถานะ
-                    }, 1500);
-                } else {
-                    // ถ้ากำลังแสดงข้อความที่ 2 > ให้สลับกลับไปแสดงข้อความที่ 1
-                    message2.style.opacity = '0';
-                    message2.style.transform = 'scale(0.5)';
-
-                    setTimeout(() => {
-                        message1.style.opacity = '1';
-                        message1.style.transform = 'scale(1)';
-                        container.classList.add('pulsating'); // กลับมาเต้นใหม่
-                        isMessageFlipped = false; // อัปเดตสถานะ
-                    }, 1500);
+        // --- Game Logic ---
+        function loadLevel(levelIndex) {
+            const levelData = levels[levelIndex];
+            canvas.width = levelData[0].length * TILE_SIZE;
+            canvas.height = levelData.length * TILE_SIZE;
+            for (let y = 0; y < levelData.length; y++) {
+                for (let x = 0; x < levelData[y].length; x++) {
+                    if (levelData[y][x] === 2) player = { x: x, y: y };
+                    else if (levelData[y][x] === 3) goal = { x: x, y: y };
                 }
-            });
-        });
-    </script>
+            }
+            titleElement.textContent = `Level ${levelIndex + 1}`;
+            subtitleElement.textContent = levelSubtitles[levelIndex];
+            draw();
+        }
 
+        function draw() {
+            if (gameEnded) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const levelData = levels[currentLevel];
+            for (let y = 0; y < levelData.length; y++) {
+                for (let x = 0; x < levelData[y].length; x++) {
+                    if (levelData[y][x] === 1) {
+                        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--wall-color');
+                        ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    }
+                }
+            }
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--goal-color');
+            ctx.fillRect(goal.x * TILE_SIZE, goal.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--player-color');
+            ctx.beginPath();
+            ctx.arc(player.x * TILE_SIZE + TILE_SIZE / 2, player.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function movePlayer(dx, dy) {
+            if (gameEnded) return;
+            const nextX = player.x + dx;
+            const nextY = player.y + dy;
+            if (levels[currentLevel][nextY][nextX] !== 1) {
+                player.x = nextX;
+                player.y = nextY;
+                checkWinCondition();
+                draw();
+            }
+        }
+
+        function checkWinCondition() {
+            if (player.x === goal.x && player.y === goal.y) {
+                if (currentLevel < levels.length - 1) {
+                    currentLevel++;
+                    loadLevel(currentLevel);
+                } else {
+                    triggerSurprise();
+                }
+            }
+        }
+
+        function triggerSurprise() {
+            gameEnded = true;
+            document.body.classList.add('glitch');
+            subtitleElement.textContent = "W H A T ?";
+            titleElement.textContent = "E R R O R";
+            titleElement.style.color = 'red';
+
+            let flashes = 0;
+            const flashInterval = setInterval(() => {
+                document.body.style.backgroundColor = flashes % 2 === 0 ? '#ff0000' : '#000';
+                flashes++;
+                if (flashes > 7) {
+                    clearInterval(flashInterval);
+                    document.body.style.backgroundColor = 'var(--bg-color)';
+                    showBirthdayMessage();
+                }
+            }, 100);
+        }
+
+        function showBirthdayMessage() {
+            const gameContainer = document.getElementById('game-container');
+            const mobileControls = document.getElementById('mobile-controls');
+            
+            gameContainer.style.opacity = '0';
+            mobileControls.style.opacity = '0';
+            
+            setTimeout(() => {
+                gameContainer.style.display = 'none';
+                mobileControls.style.display = 'none';
+                document.body.classList.remove('glitch');
+                
+                messageOverlay.style.display = 'flex';
+                setTimeout(() => {
+                    messageOverlay.style.opacity = '1';
+                }, 50);
+
+            }, 500);
+        }
+
+        // --- Event Listeners ---
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp': case 'w': movePlayer(0, -1); break;
+                case 'ArrowDown': case 's': movePlayer(0, 1); break;
+                case 'ArrowLeft': case 'a': movePlayer(-1, 0); break;
+                case 'ArrowRight': case 'd': movePlayer(1, 0); break;
+            }
+        });
+        document.getElementById('btn-up').addEventListener('click', () => movePlayer(0, -1));
+        document.getElementById('btn-down').addEventListener('click', () => movePlayer(0, 1));
+        document.getElementById('btn-left').addEventListener('click', () => movePlayer(-1, 0));
+        document.getElementById('btn-right').addEventListener('click', () => movePlayer(1, 0));
+
+        // --- Initial Load ---
+        window.onload = () => {
+            loadLevel(currentLevel);
+        };
+    </script>
 </body>
 </html>
 
