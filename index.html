@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -385,3 +385,589 @@
 </body>
 </html>
 
+ -->
+
+
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ของขวัญสุดพิเศษสำหรับพี่</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color-1: #ffefff;
+            --bg-color-2: #e0f7fa;
+            --bg-color-3: #fffde7;
+            --bg-color-4: #f3e5f5;
+            --final-bg: #fff;
+            --text-color: #5d4037;
+            --primary-color: #ff80ab;
+            --secondary-color: #4fc3f7;
+            --star-color: #ffeb3b;
+            --heart-color: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Mitr', sans-serif;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+        
+        .screen h1 {
+            font-size: 2.2em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .screen p {
+            font-size: 1.2em;
+            margin-top: 0;
+        }
+
+        .start-button, .next-button {
+            padding: 15px 35px;
+            font-size: 1.2em;
+            font-family: 'Mitr', sans-serif;
+            color: white;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+        .start-button:hover, .next-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        /* --- Level 1: Star Catcher --- */
+        #level-1 { background-color: #1a237e; }
+        #level-1 h1, #level-1 p { color: white; text-shadow: 0 0 5px #fff;}
+        #game-area {
+            width: 100%;
+            height: 70%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+        #player-basket {
+            position: absolute;
+            bottom: 10px;
+            width: 60px;
+            height: 40px;
+            font-size: 50px;
+            text-align: center;
+            line-height: 40px;
+            transition: left 0.1s linear;
+        }
+        .star {
+            position: absolute;
+            font-size: 30px;
+            color: var(--star-color);
+        }
+        #star-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+        .control-zone { width: 50%; height: 100%; }
+
+        /* --- Level 2: Connect Dots --- */
+        #level-2 { background-color: var(--bg-color-2); }
+        #dots-canvas {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        /* --- Level 3: Word Puzzle --- */
+        #level-3 { background-color: var(--bg-color-4); }
+        #answer-box {
+            width: 80%;
+            height: 60px;
+            background: white;
+            border: 2px dashed var(--primary-color);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: var(--primary-color);
+            letter-spacing: 10px;
+        }
+        #letter-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .letter-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            font-family: 'Mitr', sans-serif;
+            border: none;
+            border-radius: 10px;
+            background-color: white;
+            color: var(--text-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .letter-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .letter-btn.used {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* --- Final Screen --- */
+        #final-screen {
+            background: linear-gradient(to bottom, #ffefff, #e0f7fa);
+        }
+        #final-message-container {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s, transform 1s;
+        }
+        #final-message-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #final-message-container h1 { font-size: 2.5em; }
+        #final-message-container p { font-size: 1.3em; line-height: 1.6; }
+        
+        /* --- Intermediate Message Screens --- */
+        .message-screen {
+            background: var(--bg-color-1);
+        }
+        .message-screen .message-text {
+            font-size: 1.5em;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+
+        <!-- Screen 0: Start -->
+        <div id="start-screen" class="screen active">
+            <h1>เกมส์สำหรับคนพิเศษ</h1>
+            <p>พร้อมจะเล่นหรือยัง?</p>
+            <button id="start-button" class="start-button">เริ่มเลย!</button>
+        </div>
+
+        <!-- Screen 1: Star Catcher -->
+        <div id="level-1" class="screen">
+            <h1>เก็บดาวแห่งคำอธิษฐาน</h1>
+            <p>ใช้ลูกศรซ้าย-ขวาบังคับ หรือแตะที่หน้าจอ</p>
+            <div id="game-area">
+                <div id="player-basket">🧺</div>
+                <!-- Stars will be generated here -->
+            </div>
+            <p>คะแนน: <span id="score">0</span> / <span id="star-goal">10</span></p>
+            <div id="star-controls">
+                <div id="left-control" class="control-zone"></div>
+                <div id="right-control" class="control-zone"></div>
+            </div>
+        </div>
+        
+        <!-- Message Screen 1 -->
+        <div id="message-1" class="screen message-screen">
+            <p class="message-text">แต่ละดวงดาวคือคำอธิษฐานของฉัน...</p>
+            <button class="next-button" onclick="showScreen(3)">ต่อไป</button>
+        </div>
+
+        <!-- Screen 2: Connect Dots -->
+        <div id="level-2" class="screen">
+            <h1>ลากเส้นต่อจุด</h1>
+            <p>คลิกหรือแตะตามตัวเลขให้ครบน้า</p>
+            <canvas id="dots-canvas"></canvas>
+        </div>
+        
+        <!-- Message Screen 2 -->
+        <div id="message-2" class="screen message-screen">
+            <p class="message-text">...ที่ขอให้พี่มีความสุขในทุกๆ วัน</p>
+            <button class="next-button" onclick="showScreen(5)">ต่อไป</button>
+        </div>
+
+        <!-- Screen 3: Word Puzzle -->
+        <div id="level-3" class="screen">
+            <h1>เรียงคำให้ถูกต้อง</h1>
+            <p>คำนี้มีความหมายมากๆ เลยนะ</p>
+            <div id="answer-box"></div>
+            <div id="letter-container"></div>
+            <button class="next-button" id="reset-word-btn" style="background: #9e9e9e; margin-top: 10px;">เริ่มใหม่</button>
+        </div>
+        
+        <!-- Message Screen 3 -->
+        <div id="message-3" class="screen message-screen">
+            <p class="message-text">...และนี่คือความรู้สึกจากใจ</p>
+            <button class="next-button" onclick="showScreen(7)">ดูคำอวยพร</button>
+        </div>
+
+        <!-- Screen 4: Final Message -->
+        <div id="final-screen" class="screen">
+            <div id="final-message-container">
+                <h1>สุขสันต์วันเกิดนะคะ</h1>
+                <p>ขอให้ทุกวันของพี่สดใสเหมือนดวงดาว<br>
+                   เต็มไปด้วยความรักเหมือนหัวใจดวงนี้<br>
+                   และมีความสุขมากๆ ในทุกๆ เรื่องเลยนะ</p>
+                <p style="margin-top: 30px; font-weight: 500;">รักที่สุดเลย ❤️</p>
+                <p style="margin-top: 20px; font-weight: 500;">จาก... แฟนของพี่</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const screens = document.querySelectorAll('.screen');
+        let currentScreen = 0;
+
+        function showScreen(index) {
+            screens.forEach(s => s.classList.remove('active'));
+            screens[index].classList.add('active');
+            currentScreen = index;
+
+            // Initialize the game for the new screen
+            if (index === 1) starCatcher.init();
+            if (index === 3) connectDots.init();
+            if (index === 5) wordPuzzle.init();
+            if (index === 7) {
+                setTimeout(() => {
+                    document.getElementById('final-message-container').classList.add('visible');
+                }, 500);
+            }
+        }
+
+        document.getElementById('start-button').addEventListener('click', () => {
+             // Fullscreen request can sometimes be blocked, so we catch the error.
+             document.querySelector('.game-container').requestFullscreen().catch(err => console.log("Fullscreen not available."));
+             showScreen(1);
+        });
+
+        // --- Level 1: Star Catcher ---
+        const starCatcher = {
+            gameArea: document.getElementById('game-area'),
+            player: document.getElementById('player-basket'),
+            scoreEl: document.getElementById('score'),
+            goalEl: document.getElementById('star-goal'),
+            leftControl: document.getElementById('left-control'),
+            rightControl: document.getElementById('right-control'),
+            playerPos: 50,
+            score: 0,
+            goal: 10,
+            gameInterval: null,
+
+            init() {
+                this.score = 0;
+                this.playerPos = 50;
+                this.scoreEl.textContent = this.score;
+                this.goalEl.textContent = this.goal;
+                this.player.style.left = `${this.playerPos}%`;
+                this.gameArea.querySelectorAll('.star').forEach(s => s.remove());
+                this.addControls();
+                this.gameInterval = setInterval(() => this.createStar(), 1000);
+            },
+            
+            createStar() {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.textContent = '⭐';
+                star.style.left = `${Math.random() * 90}%`;
+                star.style.top = '-30px';
+                this.gameArea.appendChild(star);
+                this.moveStar(star);
+            },
+
+            moveStar(star) {
+                let top = -30;
+                const moveInterval = setInterval(() => {
+                    if (currentScreen !== 1) { // Stop moving if screen changes
+                        clearInterval(moveInterval);
+                        star.remove();
+                        return;
+                    }
+                    top += 5;
+                    star.style.top = `${top}px`;
+
+                    const playerRect = this.player.getBoundingClientRect();
+                    const starRect = star.getBoundingClientRect();
+                    if (starRect.bottom > playerRect.top && starRect.right > playerRect.left && starRect.left < playerRect.right) {
+                        star.remove();
+                        clearInterval(moveInterval);
+                        this.score++;
+                        this.scoreEl.textContent = this.score;
+                        if (this.score >= this.goal) {
+                            this.endLevel();
+                        }
+                    }
+
+                    if (top > this.gameArea.clientHeight) {
+                        star.remove();
+                        clearInterval(moveInterval);
+                    }
+                }, 50);
+            },
+            
+            movePlayer(direction) {
+                if (direction === 'left') this.playerPos -= 3;
+                if (direction === 'right') this.playerPos += 3;
+                if (this.playerPos < 0) this.playerPos = 0;
+                if (this.playerPos > 90) this.playerPos = 90;
+                this.player.style.left = `${this.playerPos}%`;
+            },
+            
+            endLevel() {
+                clearInterval(this.gameInterval);
+                this.removeControls();
+                setTimeout(() => showScreen(2), 1000);
+            },
+
+            addControls() {
+                // Touch controls
+                this.touchLeftHandler = () => this.movePlayer('left');
+                this.touchRightHandler = () => this.movePlayer('right');
+                this.leftControl.addEventListener('touchstart', this.touchLeftHandler);
+                this.rightControl.addEventListener('touchstart', this.touchRightHandler);
+                
+                // Keyboard controls for PC
+                this.keyHandler = (e) => {
+                    if (currentScreen !== 1) return;
+                    if (e.key === 'ArrowLeft') this.movePlayer('left');
+                    if (e.key === 'ArrowRight') this.movePlayer('right');
+                };
+                document.addEventListener('keydown', this.keyHandler);
+            },
+            removeControls() {
+                 this.leftControl.removeEventListener('touchstart', this.touchLeftHandler);
+                 this.rightControl.removeEventListener('touchstart', this.touchRightHandler);
+                 document.removeEventListener('keydown', this.keyHandler);
+            }
+        };
+
+        // --- Level 2: Connect Dots ---
+        const connectDots = {
+            canvas: document.getElementById('dots-canvas'),
+            ctx: null,
+            dots: [],
+            lastConnected: -1,
+
+            init() {
+                const canvasSize = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.6);
+                this.canvas.width = canvasSize;
+                this.canvas.height = canvasSize;
+                this.ctx = this.canvas.getContext('2d');
+                this.lastConnected = -1;
+                // New coordinates for a heart shape
+                this.dots = [
+                    {x: 0.5, y: 0.9},  // 1. Bottom tip
+                    {x: 0.2, y: 0.6},  // 2. Lower left side
+                    {x: 0.1, y: 0.3},  // 3. Upper left side
+                    {x: 0.3, y: 0.1},  // 4. Top left curve
+                    {x: 0.5, y: 0.3},  // 5. Top middle dip
+                    {x: 0.7, y: 0.1},  // 6. Top right curve
+                    {x: 0.9, y: 0.3},  // 7. Upper right side
+                    {x: 0.8, y: 0.6}   // 8. Lower right side
+                ].map(p => ({ x: p.x * canvasSize, y: p.y * canvasSize }));
+                this.draw();
+                this.addControls();
+            },
+
+            draw() {
+                const rootStyle = getComputedStyle(document.documentElement);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                // Draw lines
+                this.ctx.strokeStyle = rootStyle.getPropertyValue('--primary-color').trim();
+                this.ctx.lineWidth = 4;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.dots[0].x, this.dots[0].y);
+                for (let i = 0; i <= this.lastConnected; i++) {
+                    // Connect to the next point, and wrap around for the last point
+                    this.ctx.lineTo(this.dots[(i + 1) % this.dots.length].x, this.dots[(i + 1) % this.dots.length].y);
+                }
+                this.ctx.stroke();
+
+                // Draw dots and numbers
+                this.dots.forEach((dot, i) => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(dot.x, dot.y, 10, 0, Math.PI * 2);
+                    this.ctx.fillStyle = (i <= this.lastConnected + 1) ? rootStyle.getPropertyValue('--primary-color').trim() : rootStyle.getPropertyValue('--secondary-color').trim();
+                    this.ctx.fill();
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = 'bold 14px Mitr';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(i + 1, dot.x, dot.y);
+                });
+            },
+            
+            handleInteraction(e) {
+                e.preventDefault();
+                const rect = this.canvas.getBoundingClientRect();
+                const eventSource = e.touches ? e.touches[0] : e;
+                const x = eventSource.clientX - rect.left;
+                const y = eventSource.clientY - rect.top;
+                
+                const nextDotIndex = this.lastConnected + 1;
+                if (nextDotIndex >= this.dots.length) return;
+
+                const nextDot = this.dots[nextDotIndex];
+                const distance = Math.sqrt((x - nextDot.x)**2 + (y - nextDot.y)**2);
+
+                if (distance < 25) { // Increased touch area
+                    this.lastConnected++;
+                    this.draw();
+                    if (this.lastConnected === this.dots.length - 1) {
+                        this.endLevel();
+                    }
+                }
+            },
+
+            endLevel() {
+                this.removeControls();
+                 setTimeout(() => showScreen(4), 1000);
+            },
+            
+            addControls() {
+                this.interactionHandler = (e) => this.handleInteraction(e);
+                this.canvas.addEventListener('touchstart', this.interactionHandler);
+                this.canvas.addEventListener('mousedown', this.interactionHandler);
+            },
+            removeControls() {
+                this.canvas.removeEventListener('touchstart', this.interactionHandler);
+                this.canvas.removeEventListener('mousedown', this.interactionHandler);
+            }
+        };
+
+        // --- Level 3: Word Puzzle ---
+        const wordPuzzle = {
+            answerBox: document.getElementById('answer-box'),
+            letterContainer: document.getElementById('letter-container'),
+            resetBtn: document.getElementById('reset-word-btn'),
+            targetWord: "รักพี่",
+            currentAnswer: "",
+            
+            init() {
+                this.reset();
+                this.addControls();
+            },
+
+            reset() {
+                this.currentAnswer = "";
+                this.answerBox.textContent = "";
+                this.letterContainer.innerHTML = "";
+                const letters = this.shuffle("กพี่รั".split(''));
+                letters.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.classList.add('letter-btn');
+                    btn.textContent = letter;
+                    btn.addEventListener('click', () => this.selectLetter(btn));
+                    this.letterContainer.appendChild(btn);
+                });
+            },
+
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            },
+
+            selectLetter(btn) {
+                this.currentAnswer += btn.textContent;
+                this.answerBox.textContent = this.currentAnswer;
+                btn.classList.add('used');
+                if (this.currentAnswer.length === this.targetWord.length) {
+                    this.checkAnswer();
+                }
+            },
+
+            checkAnswer() {
+                const rootStyle = getComputedStyle(document.documentElement);
+                if (this.currentAnswer === this.targetWord) {
+                    this.answerBox.style.borderColor = 'lightgreen';
+                    this.endLevel();
+                } else {
+                    this.answerBox.style.borderColor = rootStyle.getPropertyValue('--heart-color').trim();
+                    setTimeout(() => {
+                        this.answerBox.style.borderColor = rootStyle.getPropertyValue('--primary-color').trim();
+                        this.reset();
+                    }, 1000);
+                }
+            },
+            
+            endLevel() {
+                this.removeControls();
+                setTimeout(() => showScreen(6), 1000);
+            },
+            
+            addControls() {
+                this.resetHandler = () => this.reset();
+                this.resetBtn.addEventListener('click', this.resetHandler);
+            },
+            removeControls() {
+                this.resetBtn.removeEventListener('click', this.resetHandler);
+            }
+        };
+
+    </script>
+</body>
+</html>
